@@ -345,15 +345,19 @@ class AppleMusicApi:
         next_url = f"/v1/me/library/songs?limit={limit}"
 
         while next_url:
+            old_url = next_url
             response = await self.client.get(f"{AMP_API_URL}{next_url}")
             raise_for_status(response)
 
             library_page = safe_json(response)
+
             if "data" not in library_page:
                 raise Exception("Error getting library songs:", response.text)
 
             songs.extend(library_page["data"])
             next_url = library_page.get("next")
+            if old_url == next_url:
+                break
 
         logger.debug(f"Library songs fetched: {len(songs)}")
 
