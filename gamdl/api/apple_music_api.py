@@ -336,17 +336,11 @@ class AppleMusicApi:
         self,
         limit: int = 100,
     ) -> list[dict]:
-        if not self.media_user_token:
-            raise ValueError(
-                "Library access requires an authenticated Apple Music session."
-            )
-
         songs: list[dict] = []
         next_url = f"/v1/me/library/songs?limit={limit}"
 
         while next_url:
-            old_url = next_url
-            response = await self.client.get(f"{AMP_API_URL}{next_url}")
+            response = await self.client.get(f"{AMP_API_URL}{next_url}",params=None)
             raise_for_status(response)
 
             library_page = safe_json(response)
@@ -356,8 +350,6 @@ class AppleMusicApi:
 
             songs.extend(library_page["data"])
             next_url = library_page.get("next")
-            if old_url == next_url:
-                break
 
         logger.debug(f"Library songs fetched: {len(songs)}")
 
